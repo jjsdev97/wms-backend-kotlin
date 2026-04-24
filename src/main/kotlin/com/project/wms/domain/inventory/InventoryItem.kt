@@ -18,15 +18,20 @@ class InventoryItem(
     @Column(name = "warehouse_id", nullable = false, length = 50)
     val warehouseId: String,
 
+    quantity: Int
+) {
     @Column(nullable = false)
-    var quantity: Int,
+    var quantity: Int = quantity
+        protected set
 
     @Version
-    var version: Long = 0,
+    var version: Long = 0
+        protected set
 
     @Column(name = "updated_at", nullable = false)
     var updatedAt: Instant = Instant.now()
-) {
+        protected set
+
     fun adjust(delta: Int) {
         val newQuantity = quantity + delta
         if (newQuantity < 0) throw InsufficientStockException(id, quantity, delta)
