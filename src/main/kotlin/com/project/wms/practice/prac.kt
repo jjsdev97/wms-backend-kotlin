@@ -1,5 +1,5 @@
-package com.project.wms.practice
-
-fun main() {
-    println("Hello world!")
-}
+//package com.project.wms.practice
+//
+//fun main() {
+//    println("Hello world!")
+//}
