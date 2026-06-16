@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: wms
@@ -24,3 +27,14 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+  graphql:
+    graphiql:
+      enabled: true
+
+  ai:
+    mcp:
+      server:
+        protocol: STREAMABLE
+        name: k-wms-mcp
+        version: 0.0.1

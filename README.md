@@ -23,7 +23,7 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
 | ORM | Spring Data JPA (Hibernate) | 표준 JPA + Kotlin `all-open`/`no-arg` 플러그인 |
 | Database | PostgreSQL | Advisory Lock, MVCC, SERIALIZABLE, Atomic UPDATE |
 | API 문서 | springdoc-openapi | OpenAPI 3.0 + Swagger UI |
-| MCP | modelcontextprotocol/kotlin-sdk | 공식 Kotlin SDK |
+| MCP | Spring AI MCP Server | Spring/Tomcat에 통합되는 단일 런타임, `@Tool` 기반 노출 |
 | 로컬 인프라 | Docker Compose | Postgres·Redis·Kafka 로컬 기동 |
 
 ### API Protocols
@@ -43,7 +43,7 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
 
   ERP/Web             ─────▶   REST API (MVC)           ────┐
   Web Admin (Planned) ─────▶   GraphQL (Spring for GQL) ────┼──▶   [ Inventory Service ]
-  MCP Client          ─────▶   MCP (SDK)                ────┘
+  MCP Client          ─────▶   MCP (Spring AI)          ────┘
 ```
 
 ---

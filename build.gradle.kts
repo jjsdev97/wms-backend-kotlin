@@ -20,9 +20,19 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.ai:spring-ai-bom:2.0.0")
+	}
+}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
+	implementation("org.springframework.boot:spring-boot-starter-graphql")
+	implementation("org.springframework.ai:spring-ai-starter-mcp-server-webmvc")
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	runtimeOnly("org.flywaydb:flyway-database-postgresql")

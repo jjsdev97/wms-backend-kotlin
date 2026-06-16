@@ -45,5 +45,19 @@ services:
     ports:
       - "9092:9092"
 
+  # TODO: 통합 기동용 앱 서비스 (추후 추가)
+  # 일상 개발은 로컬 ./gradlew bootRun 유지, 전체 통합 기동이 필요할 때만 사용.
+  # Dockerfile(멀티스테이지) 작성 후 profiles로 옵션화 예정.
+  # app:
+  #   build: .
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wms
+  #   ports:
+  #     - "8081:8080"
+  #   profiles: ["full"]
+
 volumes:
   postgres_data:

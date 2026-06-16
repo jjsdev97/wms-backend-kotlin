@@ -1,0 +1,20 @@
+type Query {
+    "전체 재고 조회"
+    inventories: [InventoryItem!]!
+    "단건 재고 조회"
+    inventory(id: ID!): InventoryItem
+}
+
+type Mutation {
+    "재고 증감 (delta 음수면 차감)"
+    adjustStock(id: ID!, delta: Int!): InventoryItem!
+}
+
+type InventoryItem {
+    id: ID!
+    sku: String!
+    warehouseId: String!
+    quantity: Int!
+    version: Int!
+    updatedAt: String!
+}
