@@ -71,7 +71,29 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
 
 ---
 
-## 6. 로드맵
+## 6. 로컬 실행 & 테스트
+
+```bash
+# 1. 인프라 기동 (PostgreSQL)
+docker compose up -d postgres
+
+# 2. 애플리케이션 실행 (기본 포트 8081)
+./gradlew bootRun
+```
+
+기동 후, 세 프로토콜을 아래에서 바로 테스트할 수 있습니다. 셋 다 동일한 `InventoryService`(재고 조회·조정)를 호출합니다.
+
+| 프로토콜 | 테스트 방법 |
+| --- | --- |
+| **REST** | Swagger UI — http://localhost:8081/swagger-ui.html |
+| **GraphQL** | GraphiQL — http://localhost:8081/graphiql |
+| **MCP** | `POST http://localhost:8081/mcp` (STREAMABLE). [MCP Inspector](https://github.com/modelcontextprotocol/inspector)에서 Transport `Streamable HTTP` + 위 URL로 연결하거나, 로컬 Claude(Claude Code/Desktop)에 등록해 사용 |
+
+> seed 데이터(`id` 1~3)가 포함돼 있어 기동 직후 바로 조회·조정을 호출할 수 있습니다.
+
+---
+
+## 7. 로드맵
 
 단계별 기술 도입 순서.
 
