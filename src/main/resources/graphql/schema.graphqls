@@ -8,6 +8,12 @@ type Query {
 type Mutation {
     "재고 증감 (delta 음수면 차감)"
     adjustStock(id: ID!, delta: Int!): InventoryItem!
+    "예약 (가용 수량 내에서 예약분 증가)"
+    reserveStock(id: ID!, amount: Int!): InventoryItem!
+    "출고 확정 (예약분을 실제 재고에서 차감)"
+    confirmStock(id: ID!, amount: Int!): InventoryItem!
+    "예약 취소 (예약분만 해제)"
+    cancelReservation(id: ID!, amount: Int!): InventoryItem!
 }
 
 type InventoryItem {
@@ -15,6 +21,8 @@ type InventoryItem {
     sku: String!
     warehouseId: String!
     quantity: Int!
+    reserved: Int!
+    available: Int!
     version: Int!
     updatedAt: String!
 }

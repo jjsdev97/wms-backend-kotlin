@@ -2,6 +2,7 @@ package com.project.wms.interfaces.rest.inventory
 
 import com.project.wms.application.inventory.InventoryService
 import com.project.wms.domain.inventory.AdjustStockCommand
+import com.project.wms.domain.inventory.ReservationCommand
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -30,4 +31,25 @@ class InventoryController(private val inventoryService: InventoryService) {
         InventoryResponse.from(
             inventoryService.adjustStock(AdjustStockCommand(id, request.delta!!))
         )
+
+    @PostMapping("/{id}/reserve")
+    fun reserve(
+        @PathVariable id: Long,
+        @Valid @RequestBody request: ReservationRequest
+    ): InventoryResponse =
+        InventoryResponse.from(inventoryService.reserve(ReservationCommand(id, request.amount!!)))
+
+    @PostMapping("/{id}/confirm")
+    fun confirm(
+        @PathVariable id: Long,
+        @Valid @RequestBody request: ReservationRequest
+    ): InventoryResponse =
+        InventoryResponse.from(inventoryService.confirm(ReservationCommand(id, request.amount!!)))
+
+    @PostMapping("/{id}/cancel")
+    fun cancel(
+        @PathVariable id: Long,
+        @Valid @RequestBody request: ReservationRequest
+    ): InventoryResponse =
+        InventoryResponse.from(inventoryService.cancel(ReservationCommand(id, request.amount!!)))
 }

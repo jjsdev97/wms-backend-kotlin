@@ -9,7 +9,7 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
 ## 1. 프로젝트 개요
 
 - **목적**: 다중 프로토콜 기반 물류 데이터 백엔드 구현
-- **도메인 범위**: 재고 조회·증감·예약·확정. 입고 / 적치 / 피킹 / 출고 / 재고실사는 추후 확장.
+- **도메인 범위**: 재고 조회·증감·예약·확정.
 
 ---
 
@@ -41,33 +41,31 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
 ```text
 [ Clients ]              [ Interface Layer ]            [ Domain Layer ]
 
-  ERP/Web             ─────▶   REST API (MVC)           ────┐
-  Web Admin (Planned) ─────▶   GraphQL (Spring for GQL) ────┼──▶   [ Inventory Service ]
-  MCP Client          ─────▶   MCP (Spring AI)          ────┘
+  ERP/Web    ─────▶   REST API (MVC)           ────┐
+  Web Client ─────▶   GraphQL (Spring for GQL) ────┼──▶   [ Inventory Service ]
+  MCP Client ─────▶   MCP (Spring AI)          ────┘
 ```
 
 ---
 
 ## 4. 주요 기능
 
-- **Inventory Management**: 재고 추적·조정
-- **Multi-Protocol Interface**: 동일 도메인 로직을 REST, GraphQL, MCP로 노출
-- **MCP Tool/Resource**: LLM 연동용 표준 인터페이스
+- **Inventory Management**: 재고 조회·증감(`adjust`), 예약(`reserve`)·확정(`confirm`)·취소(`cancel`). `available = quantity - reserved`
+- **Multi-Protocol Interface**: 동일 `InventoryService`를 REST, GraphQL, MCP로 노출
+- **MCP Tool**: `getInventory`, `adjustStock`, `reserveStock`, `confirmStock`, `cancelReservation` (Spring AI `@Tool`)
 - **Swagger UI**: REST API 문서화·테스트
-- **Authentication**: Spring Security + JWT
 
 ---
 
-## 5. API 명세 (Planned)
+## 5. API 명세
 
 | Protocol | Endpoint |
 | --- | --- |
 | REST | `/api/v1/inventory/**` |
 | GraphQL | `/graphql` |
-| MCP | `mcp://inventory-resource`, `tools/update_stock` |
+| MCP | `POST /mcp` (`getInventory`, `adjustStock`) |
 
 - **UI**: 프론트엔드는 제공하지 않고 Swagger UI로 테스트.
-- **부하 테스트 시각화 (계획)**: k6 시나리오 트리거 후 RPS, p99, 에러율, 재고 정합성을 표시하는 간단한 페이지 추가 예정.
 
 ---
 
