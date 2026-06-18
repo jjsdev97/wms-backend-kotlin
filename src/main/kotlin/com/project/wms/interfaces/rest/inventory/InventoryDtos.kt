@@ -1,6 +1,7 @@
 package com.project.wms.interfaces.rest.inventory
 
 import com.project.wms.domain.inventory.InventoryItem
+import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 import java.time.Instant
@@ -34,8 +35,17 @@ data class AdjustStockRequest(
     val delta: Int?
 )
 
-data class ReservationRequest(
+data class ReserveRequest(
+    @field:NotBlank(message = "reservationId는 필수입니다")
+    val reservationId: String?,
+
     @field:NotNull(message = "amount는 필수입니다")
     @field:Positive(message = "amount는 1 이상이어야 합니다")
     val amount: Int?
+)
+
+/** 확정·취소 요청. 예약 전체를 대상으로 하므로 reservationId만 받는다. */
+data class ReservationRefRequest(
+    @field:NotBlank(message = "reservationId는 필수입니다")
+    val reservationId: String?
 )

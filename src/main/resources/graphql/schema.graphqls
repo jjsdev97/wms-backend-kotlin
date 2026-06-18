@@ -8,12 +8,12 @@ type Query {
 type Mutation {
     "재고 증감 (delta 음수면 차감)"
     adjustStock(id: ID!, delta: Int!): InventoryItem!
-    "예약 (가용 수량 내에서 예약분 증가)"
-    reserveStock(id: ID!, amount: Int!): InventoryItem!
-    "출고 확정 (예약분을 실제 재고에서 차감)"
-    confirmStock(id: ID!, amount: Int!): InventoryItem!
-    "예약 취소 (예약분만 해제)"
-    cancelReservation(id: ID!, amount: Int!): InventoryItem!
+    "예약 생성. reservationId는 멱등 자연키 (같은 키 재호출 시 중복 차감 없음)"
+    reserveStock(id: ID!, reservationId: String!, amount: Int!): InventoryItem!
+    "출고 확정. 예약 전체를 확정 (이미 확정된 예약이면 no-op)"
+    confirmStock(id: ID!, reservationId: String!): InventoryItem!
+    "예약 취소. 예약 전체를 취소 (이미 취소된 예약이면 no-op)"
+    cancelReservation(id: ID!, reservationId: String!): InventoryItem!
 }
 
 type InventoryItem {

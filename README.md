@@ -46,11 +46,17 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
   MCP Client ─────▶   MCP (Spring AI)          ────┘
 ```
 
+- **디렉토리 구조 지도**: [docs/structure.md](docs/structure.md)
+- **코드 흐름·원리(요청 추적·낙관적 락·멱등성)**: [docs/code-walkthrough.md](docs/code-walkthrough.md)
+
 ---
 
 ## 4. 주요 기능
 
 - **Inventory Management**: 재고 조회·증감(`adjust`), 예약(`reserve`)·확정(`confirm`)·취소(`cancel`). `available = quantity - reserved`
+- **Idempotency**: 두 층위로 멱등성 보장
+  - **예약·확정·취소**: `Reservation` 엔티티의 `reservationId`(클라이언트 제공 자연키)로 **도메인 차원 멱등** — REST·GraphQL·MCP 어느 진입점에서 같은 키로 재호출해도 중복 차감이 없다(`confirm`/`cancel`은 예약 전체 대상, 이미 처리된 상태면 no-op)
+  - **재고 증감(`adjust`)**: 자연키가 없는 순수 델타라, Redis 기반 `IdempotencyExecutor`로 요청 단위 멱등 처리(REST는 `Idempotency-Key` 헤더 `@Idempotent` AOP, MCP는 `requestId` toolParam, 키 생략 시 일반 처리)
 - **Multi-Protocol Interface**: 동일 `InventoryService`를 REST, GraphQL, MCP로 노출
 - **MCP Tool**: `getInventory`, `adjustStock`, `reserveStock`, `confirmStock`, `cancelReservation` (Spring AI `@Tool`)
 - **Swagger UI**: REST API 문서화·테스트
@@ -63,7 +69,7 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
 | --- | --- |
 | REST | `/api/v1/inventory/**` |
 | GraphQL | `/graphql` |
-| MCP | `POST /mcp` (`getInventory`, `adjustStock`) |
+| MCP | `POST /mcp` (`getInventory`, `adjustStock`, `reserveStock`, `confirmStock`, `cancelReservation`) |
 
 - **UI**: 프론트엔드는 제공하지 않고 Swagger UI로 테스트.
 
@@ -72,12 +78,30 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
 ## 6. 로컬 실행 & 테스트
 
 ```bash
-# 1. 인프라 기동 (PostgreSQL)
-docker compose up -d postgres
+# 1. 인프라 기동 (PostgreSQL, Redis)
+docker compose up -d postgres redis
 
 # 2. 애플리케이션 실행 (기본 포트 8081)
 ./gradlew bootRun
 ```
+
+> **멱등 요청**
+>
+> 예약/확정/취소는 `reservationId`(자연키)로 멱등합니다. 같은 키로 다시 호출해도 한 번만 반영됩니다.
+>
+> ```bash
+> # 예약 — 같은 reservationId로 재호출해도 중복 예약되지 않음
+> curl -X POST http://localhost:8081/api/v1/inventory/1/reserve \
+>   -H "Content-Type: application/json" \
+>   -d '{"reservationId": "order-1001", "amount": 5}'
+>
+> # 확정/취소 — 예약 전체 대상, reservationId만 전달
+> curl -X POST http://localhost:8081/api/v1/inventory/1/confirm \
+>   -H "Content-Type: application/json" \
+>   -d '{"reservationId": "order-1001"}'
+> ```
+>
+> 재고 증감(`adjust`)은 자연키가 없어, 선택적으로 `Idempotency-Key: <고유값>` 헤더를 보내면 같은 키의 재요청이 최초 응답을 그대로 돌려받습니다(헤더 생략 시 매번 처리).
 
 기동 후, 세 프로토콜을 아래에서 바로 테스트할 수 있습니다. 셋 다 동일한 `InventoryService`(재고 조회·조정)를 호출합니다.
 

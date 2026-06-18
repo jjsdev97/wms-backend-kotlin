@@ -5,6 +5,11 @@ spring:
   application:
     name: wms
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   datasource:
     url: jdbc:postgresql://localhost:5432/wms
     username: wms

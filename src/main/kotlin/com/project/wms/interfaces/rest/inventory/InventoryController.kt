@@ -2,7 +2,9 @@ package com.project.wms.interfaces.rest.inventory
 
 import com.project.wms.application.inventory.InventoryService
 import com.project.wms.domain.inventory.AdjustStockCommand
-import com.project.wms.domain.inventory.ReservationCommand
+import com.project.wms.domain.inventory.ReservationRef
+import com.project.wms.domain.inventory.ReserveCommand
+import com.project.wms.infrastructure.idempotency.Idempotent
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,6 +25,7 @@ class InventoryController(private val inventoryService: InventoryService) {
     fun getOne(@PathVariable id: Long): InventoryResponse =
         InventoryResponse.from(inventoryService.getInventory(id))
 
+    @Idempotent
     @PostMapping("/{id}/adjust")
     fun adjust(
         @PathVariable id: Long,
@@ -35,21 +38,23 @@ class InventoryController(private val inventoryService: InventoryService) {
     @PostMapping("/{id}/reserve")
     fun reserve(
         @PathVariable id: Long,
-        @Valid @RequestBody request: ReservationRequest
+        @Valid @RequestBody request: ReserveRequest
     ): InventoryResponse =
-        InventoryResponse.from(inventoryService.reserve(ReservationCommand(id, request.amount!!)))
+        InventoryResponse.from(
+            inventoryService.reserve(ReserveCommand(id, request.reservationId!!, request.amount!!))
+        )
 
     @PostMapping("/{id}/confirm")
     fun confirm(
         @PathVariable id: Long,
-        @Valid @RequestBody request: ReservationRequest
+        @Valid @RequestBody request: ReservationRefRequest
     ): InventoryResponse =
-        InventoryResponse.from(inventoryService.confirm(ReservationCommand(id, request.amount!!)))
+        InventoryResponse.from(inventoryService.confirm(ReservationRef(id, request.reservationId!!)))
 
     @PostMapping("/{id}/cancel")
     fun cancel(
         @PathVariable id: Long,
-        @Valid @RequestBody request: ReservationRequest
+        @Valid @RequestBody request: ReservationRefRequest
     ): InventoryResponse =
-        InventoryResponse.from(inventoryService.cancel(ReservationCommand(id, request.amount!!)))
+        InventoryResponse.from(inventoryService.cancel(ReservationRef(id, request.reservationId!!)))
 }

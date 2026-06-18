@@ -3,7 +3,13 @@ package com.project.wms.interfaces.rest
 import com.project.wms.domain.inventory.InsufficientReservationException
 import com.project.wms.domain.inventory.InsufficientStockException
 import com.project.wms.domain.inventory.InvalidAmountException
+import com.project.wms.domain.inventory.IllegalReservationStateException
 import com.project.wms.domain.inventory.InventoryNotFoundException
+import com.project.wms.domain.inventory.ReservationConflictException
+import com.project.wms.domain.inventory.ReservationNotFoundException
+import com.project.wms.infrastructure.idempotency.IdempotencyConflictException
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -28,6 +34,32 @@ class GlobalExceptionHandler {
     @ExceptionHandler(InvalidAmountException::class)
     fun handleInvalidAmount(e: InvalidAmountException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.message ?: "잘못된 수량")
+
+    @ExceptionHandler(ReservationNotFoundException::class)
+    fun handleReservationNotFound(e: ReservationNotFoundException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.message ?: "예약 없음")
+
+    @ExceptionHandler(ReservationConflictException::class)
+    fun handleReservationConflict(e: ReservationConflictException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.message ?: "예약 충돌")
+
+    @ExceptionHandler(IllegalReservationStateException::class)
+    fun handleIllegalReservationState(e: IllegalReservationStateException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.message ?: "잘못된 예약 상태 전이")
+
+    @ExceptionHandler(IdempotencyConflictException::class)
+    fun handleIdempotencyConflict(e: IdempotencyConflictException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.message ?: "중복 요청 처리 중")
+
+    /** 낙관적 락 충돌(동시 수정) — 재시도 가능 신호. */
+    @ExceptionHandler(OptimisticLockingFailureException::class)
+    fun handleOptimisticLock(e: OptimisticLockingFailureException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "동시 수정 충돌입니다. 다시 시도하세요.")
+
+    /** 같은 reservationId 동시 예약 등 무결성 위반 — 재시도하면 멱등 처리된다. */
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrity(e: DataIntegrityViolationException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "동시 요청 충돌입니다. 다시 시도하세요.")
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(e: MethodArgumentNotValidException): ProblemDetail {
