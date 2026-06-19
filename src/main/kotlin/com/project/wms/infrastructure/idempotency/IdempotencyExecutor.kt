@@ -12,6 +12,9 @@ import tools.jackson.databind.ObjectMapper
  * - 재요청(완료): 캐시된 응답을 [type]으로 역직렬화해 반환([block] 미실행).
  * - 재요청(처리 중): [IdempotencyConflictException].
  *
+ * 선점 마커(IN_PROGRESS)는 응답 캐시보다 짧은 [IN_PROGRESS_TTL_SECONDS]로 건다.
+ * 처리 중 프로세스가 죽어 [release]가 돌지 못해도 마커가 곧 만료돼 재시도가 풀리도록.
+ *
  * @param scope 서로 다른 작업 간 키 충돌을 막기 위한 네임스페이스(예: "rest:POST:/.../reserve", "mcp:reserveStock").
  */
 @Component
@@ -26,7 +29,7 @@ class IdempotencyExecutor(
         }
         val scopedKey = "$scope:$key"
 
-        if (store.acquire(scopedKey, ttlSeconds)) {
+        if (store.acquire(scopedKey, IN_PROGRESS_TTL_SECONDS)) {
             return try {
                 val result = block()
                 store.complete(scopedKey, objectMapper.writeValueAsString(result), ttlSeconds)
@@ -47,5 +50,11 @@ class IdempotencyExecutor(
     companion object {
         /** 멱등 키 보관 기본 시간(초). 24시간. */
         const val DEFAULT_TTL_SECONDS = 86_400L
+
+        /**
+         * 선점 마커 보관 시간(초). 정상 처리 시간을 덮을 만큼 넉넉하되,
+         * 크래시로 [IdempotencyStore.release]가 누락돼도 곧 풀리도록 짧게 둔다.
+         */
+        const val IN_PROGRESS_TTL_SECONDS = 60L
     }
 }

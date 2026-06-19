@@ -15,6 +15,7 @@ class IdempotencyExecutorTest {
     private val executor = IdempotencyExecutor(store, objectMapper)
 
     private val ttl = 86_400L
+    private val inProgressTtl = IdempotencyExecutor.IN_PROGRESS_TTL_SECONDS
     private val scope = "rest:POST:/api/v1/inventory/1/reserve"
 
     data class Dummy(val id: Long, val name: String)
@@ -35,7 +36,7 @@ class IdempotencyExecutorTest {
     @Test
     fun `첫 요청이면 블록을 실행하고 응답을 캐시한다`() {
         val expected = Dummy(1, "a")
-        every { store.acquire("$scope:k1", ttl) } returns true
+        every { store.acquire("$scope:k1", inProgressTtl) } returns true
 
         val result = executor.execute("k1", scope, Dummy::class.java, ttl) { expected }
 
@@ -46,7 +47,7 @@ class IdempotencyExecutorTest {
     @Test
     fun `완료된 키 재요청이면 캐시된 응답을 반환하고 블록을 실행하지 않는다`() {
         val cached = Dummy(7, "cached")
-        every { store.acquire(any(), ttl) } returns false
+        every { store.acquire(any(), inProgressTtl) } returns false
         every { store.find("$scope:k1") } returns objectMapper.writeValueAsString(cached)
         every { store.isInProgress(any()) } returns false
 
@@ -62,7 +63,7 @@ class IdempotencyExecutorTest {
 
     @Test
     fun `처리 중인 키 재요청이면 충돌 예외를 던진다`() {
-        every { store.acquire(any(), ttl) } returns false
+        every { store.acquire(any(), inProgressTtl) } returns false
         every { store.find(any()) } returns IdempotencyStore.IN_PROGRESS
         every { store.isInProgress(IdempotencyStore.IN_PROGRESS) } returns true
 
@@ -73,7 +74,7 @@ class IdempotencyExecutorTest {
 
     @Test
     fun `블록 실행 중 예외가 나면 선점을 해제하고 예외를 전파한다`() {
-        every { store.acquire("$scope:k1", ttl) } returns true
+        every { store.acquire("$scope:k1", inProgressTtl) } returns true
 
         assertThrows<IllegalStateException> {
             executor.execute("k1", scope, Dummy::class.java, ttl) { throw IllegalStateException("boom") }
