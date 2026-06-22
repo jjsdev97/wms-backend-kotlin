@@ -4,6 +4,10 @@ Kotlin-based Warehouse Management System with Multi-Protocol Support
 
 Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메인 로직을 REST, GraphQL, MCP 세 가지 프로토콜로 노출하여 설계·구현·성능 차이를 비교하는 학습 프로젝트입니다.
 
+> ⚠️ **학습용 프로젝트입니다.**
+> 새로운 기술을 익히며 만드는 프로젝트라, 일부 기능·설계가 실무 기준에서 보면 과하거나(over-engineering),
+> 반대로 단순화돼 있거나, 의도적으로 뒤틀려 있을 수 있습니다. 프로덕션 용도가 아닙니다.
+
 ---
 
 ## 1. 프로젝트 개요
