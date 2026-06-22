@@ -45,19 +45,11 @@ services:
     ports:
       - "9092:9092"
 
-  # TODO: 통합 기동용 앱 서비스 (추후 추가)
-  # 일상 개발은 로컬 ./gradlew bootRun 유지, 전체 통합 기동이 필요할 때만 사용.
-  # Dockerfile(멀티스테이지) 작성 후 profiles로 옵션화 예정.
-  # app:
-  #   build: .
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wms
-  #   ports:
-  #     - "8081:8080"
-  #   profiles: ["full"]
+  # 통합 기동용 앱 서비스는 docker-compose.app.yml로 분리했다.
+  # 이 파일(인프라)은 비밀과 무관해야 하므로 app의 ${APP_JWT_SECRET:?} 치환이
+  # 인프라만 띄우는 `docker compose up postgres redis`까지 막지 않도록 하기 위함.
+  # 전체 통합 기동:
+  #   docker compose -f docker-compose.yml -f docker-compose.app.yml up --build
 
 volumes:
   postgres_data:

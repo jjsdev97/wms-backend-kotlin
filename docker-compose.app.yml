@@ -1,0 +1,29 @@
+# 통합 기동용 앱 서비스(인프라 docker-compose.yml과 합쳐서 사용).
+#   docker compose -f docker-compose.yml -f docker-compose.app.yml up --build
+#
+# 이 파일을 분리한 이유: app의 ${APP_JWT_SECRET:?} 치환은 profile과 무관하게
+# 항상 평가돼서, 같은 파일에 두면 .env 없이 인프라만 띄우는 것조차 막아버린다.
+# 비밀이 필요한 app만 떼어내 인프라 기동을 secret과 독립시킨다.
+services:
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # 컨테이너 네트워크 기준으로 인프라 호스트를 덮어쓴다(application.yml의 localhost 대체).
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wms
+      SPRING_DATA_REDIS_HOST: redis
+      # 비밀 주입: compose가 같은 폴더의 .env(=git 미추적)에서 APP_JWT_SECRET을 읽어 넣는다.
+      # 미설정이면 'up' 자체가 실패(:?)하여 빈 비밀로 기동되는 사고를 막는다.
+      # 운영에선 .env 대신 Secret Manager/Vault/k8s Secret이 이 환경변수를 채운다.
+      APP_JWT_SECRET: ${APP_JWT_SECRET:?APP_JWT_SECRET가 필요합니다. .env에 설정하세요}
+    ports:
+      - "8081:8081"
+
+# 참고) 더 "운영다운" 방식은 환경변수 대신 docker secret(파일 마운트)이다:
+#   secrets: [jwt_secret]   # /run/secrets/jwt_secret 로 마운트됨
+# 단 Spring에서 파일 비밀을 읽으려면 SPRING_CONFIG_IMPORT 등 추가 설정이 필요해,
+# 여기서는 Spring과 가장 자연스러운 환경변수 주입을 택했다.

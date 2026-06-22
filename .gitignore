@@ -44,3 +44,7 @@ out/
 ## PRIVATE ##
 .claude
 /docs
+
+## SECRETS ## (로컬 비밀값 — git 미추적. *.example 템플릿만 커밋)
+application-local.yml
+.env
