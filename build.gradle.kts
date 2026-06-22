@@ -30,6 +30,10 @@ dependencyManagement {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	// 인증/인가. oauth2-resource-server는 Nimbus(JOSE) 기반 JwtEncoder/JwtDecoder를 제공해
+	// HS256 대칭키로 JWT를 직접 발급·검증한다. (jjwt-jackson은 Jackson 2 의존이라 이 프로젝트의 Jackson 3와 충돌)
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 	implementation("org.springframework.boot:spring-boot-starter-graphql")

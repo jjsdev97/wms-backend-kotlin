@@ -40,6 +40,9 @@ abstract class IntegrationTestBase {
             registry.add("spring.datasource.password", postgres::getPassword)
             registry.add("spring.data.redis.host", redis::getHost)
             registry.add("spring.data.redis.port") { redis.getMappedPort(6379) }
+            // 운영은 env(APP_JWT_SECRET)로 주입하므로 application.yml엔 기본값이 없다.
+            // 테스트 컨텍스트 로드를 위해 HS256용 32바이트 이상 더미 키를 주입한다.
+            registry.add("app.jwt.secret") { "integration-test-only-secret-32bytes-minimum" }
         }
     }
 }

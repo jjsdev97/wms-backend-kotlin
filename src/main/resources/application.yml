@@ -43,3 +43,10 @@ spring:
         protocol: STREAMABLE
         name: k-wms-mcp
         version: 0.0.1
+
+# JWT 설정. secret은 HS256용 대칭키(최소 32바이트)이며 소스에 두지 않는다.
+# 반드시 환경변수 APP_JWT_SECRET로 주입한다(미설정 시 기동 실패).
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET}
+    expiration-minutes: ${APP_JWT_EXPIRATION_MINUTES:60}

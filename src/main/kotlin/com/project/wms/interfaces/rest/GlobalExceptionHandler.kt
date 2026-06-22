@@ -7,8 +7,10 @@ import com.project.wms.domain.inventory.IllegalReservationStateException
 import com.project.wms.domain.inventory.InventoryNotFoundException
 import com.project.wms.domain.inventory.ReservationConflictException
 import com.project.wms.domain.inventory.ReservationNotFoundException
+import com.project.wms.domain.user.UsernameAlreadyExistsException
 import com.project.wms.infrastructure.idempotency.IdempotencyConflictException
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
@@ -60,6 +62,16 @@ class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException::class)
     fun handleDataIntegrity(e: DataIntegrityViolationException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "동시 요청 충돌입니다. 다시 시도하세요.")
+
+    /** 회원가입 시 username 중복. */
+    @ExceptionHandler(UsernameAlreadyExistsException::class)
+    fun handleUsernameExists(e: UsernameAlreadyExistsException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.message ?: "이미 사용 중인 사용자명")
+
+    /** 로그인 실패(자격증명 불일치 등). 어떤 부분이 틀렸는지는 노출하지 않는다. */
+    @ExceptionHandler(AuthenticationException::class)
+    fun handleAuthentication(e: AuthenticationException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다.")
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(e: MethodArgumentNotValidException): ProblemDetail {
