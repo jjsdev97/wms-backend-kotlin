@@ -9,6 +9,7 @@ import com.project.wms.domain.inventory.ReservationConflictException
 import com.project.wms.domain.inventory.ReservationNotFoundException
 import com.project.wms.domain.user.UsernameAlreadyExistsException
 import com.project.wms.infrastructure.idempotency.IdempotencyConflictException
+import com.project.wms.infrastructure.idempotency.IdempotencyKeyReuseException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.dao.OptimisticLockingFailureException
@@ -52,6 +53,11 @@ class GlobalExceptionHandler {
     @ExceptionHandler(IdempotencyConflictException::class)
     fun handleIdempotencyConflict(e: IdempotencyConflictException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.message ?: "중복 요청 처리 중")
+
+    /** 같은 Idempotency-Key로 다른 내용의 요청 — 멱등 계약 위반. */
+    @ExceptionHandler(IdempotencyKeyReuseException::class)
+    fun handleIdempotencyKeyReuse(e: IdempotencyKeyReuseException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.message ?: "Idempotency-Key 재사용 충돌")
 
     /** 낙관적 락 충돌(동시 수정) — 재시도 가능 신호. */
     @ExceptionHandler(OptimisticLockingFailureException::class)

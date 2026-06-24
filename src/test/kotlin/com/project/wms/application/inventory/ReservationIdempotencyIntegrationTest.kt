@@ -3,7 +3,6 @@ package com.project.wms.application.inventory
 import com.project.wms.domain.inventory.ReservationRef
 import com.project.wms.domain.inventory.ReserveCommand
 import com.project.wms.support.IntegrationTestBase
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -12,7 +11,6 @@ import kotlin.test.assertEquals
 /**
  * 실제 Postgres로 예약 자연키 멱등성을 검증한다. (seed: id 1~3)
  */
-@Disabled(IntegrationTestBase.DISABLED_REASON)
 class ReservationIdempotencyIntegrationTest @Autowired constructor(
     private val service: InventoryService,
 ) : IntegrationTestBase() {

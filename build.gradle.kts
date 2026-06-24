@@ -23,7 +23,7 @@ repositories {
 dependencyManagement {
 	imports {
 		mavenBom("org.springframework.ai:spring-ai-bom:2.0.0")
-		mavenBom("org.testcontainers:testcontainers-bom:1.20.6")
+		mavenBom("org.testcontainers:testcontainers-bom:1.21.4")
 	}
 }
 
@@ -48,12 +48,7 @@ dependencies {
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
-	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
-	// Testcontainers 1.20.6 번들 docker-java(3.4.1)는 최신 Docker Desktop named pipe와 400 충돌.
-	// HTTP Host 헤더 처리가 고쳐진 최신 트랜스포트로 올린다.
-	testImplementation("com.github.docker-java:docker-java-core:3.7.1")
-	testImplementation("com.github.docker-java:docker-java-transport-zerodep:3.7.1")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("io.mockk:mockk:1.13.13")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")

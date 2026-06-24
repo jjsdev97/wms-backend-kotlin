@@ -41,7 +41,13 @@ class InventoryMcpTools(
             description = "멱등 키(선택). 같은 키로 재호출하면 중복 증감 없이 첫 결과를 반환한다.",
         ) requestId: String? = null,
     ): String =
-        idempotency.execute(requestId, "mcp:adjustStock:$id", String::class.java, IdempotencyExecutor.DEFAULT_TTL_SECONDS) {
+        idempotency.execute(
+            requestId,
+            "mcp:adjustStock:$id",
+            String::class.java,
+            IdempotencyExecutor.DEFAULT_TTL_SECONDS,
+            fingerprint = "$id:$delta",
+        ) {
             "조정 완료: " + describe(inventoryService.adjustStock(AdjustStockCommand(id, delta)))
         }
 

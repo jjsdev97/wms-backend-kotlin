@@ -51,9 +51,6 @@ Kotlin으로 구축한 창고 관리 시스템(WMS) 백엔드. 동일한 도메�
   MCP Client ─────▶   MCP (Spring AI)          ────┘
 ```
 
-- **디렉토리 구조 지도**: [docs/structure.md](docs/structure.md)
-- **코드 흐름·원리(요청 추적·낙관적 락·멱등성)**: [docs/code-walkthrough.md](docs/code-walkthrough.md)
-
 ---
 
 ## 4. 주요 기능
