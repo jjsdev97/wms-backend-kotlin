@@ -8,3 +8,12 @@
 app:
   jwt:
     secret: change-me-to-a-random-string-at-least-32-bytes-long
+  security:
+    exposure:
+      mcp-public: true
+      dev-endpoints-public: true
+
+spring:
+  graphql:
+    graphiql:
+      enabled: true

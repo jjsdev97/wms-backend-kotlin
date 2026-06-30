@@ -9,6 +9,9 @@ class UserPersistenceAdapter(
     private val jpaRepository: UserJpaRepository
 ) : UserRepository {
 
+    override fun findById(id: Long): User? =
+        jpaRepository.findById(id).orElse(null)
+
     override fun findByUsername(username: String): User? =
         jpaRepository.findByUsername(username)
 

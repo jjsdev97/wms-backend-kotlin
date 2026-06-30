@@ -35,7 +35,7 @@ spring:
 
   graphql:
     graphiql:
-      enabled: true
+      enabled: false
 
   ai:
     mcp:
@@ -49,4 +49,9 @@ spring:
 app:
   jwt:
     secret: ${APP_JWT_SECRET}
-    expiration-minutes: ${APP_JWT_EXPIRATION_MINUTES:60}
+    expiration-minutes: ${APP_JWT_EXPIRATION_MINUTES:15}
+    refresh-expiration-days: ${APP_REFRESH_TOKEN_EXPIRATION_DAYS:14}
+  security:
+    exposure:
+      mcp-public: ${APP_SECURITY_MCP_PUBLIC:false}
+      dev-endpoints-public: ${APP_SECURITY_DEV_ENDPOINTS_PUBLIC:false}

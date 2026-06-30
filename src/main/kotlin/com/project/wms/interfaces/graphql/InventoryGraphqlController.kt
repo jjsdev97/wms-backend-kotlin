@@ -1,7 +1,6 @@
 package com.project.wms.interfaces.graphql
 
 import com.project.wms.application.inventory.InventoryService
-import com.project.wms.interfaces.rest.inventory.InventoryResponse
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
@@ -21,10 +20,10 @@ import org.springframework.stereotype.Controller
 class InventoryGraphqlController(private val inventoryService: InventoryService) {
 
     @QueryMapping
-    fun inventories(): List<InventoryResponse> =
-        inventoryService.getAllInventory().map(InventoryResponse::from)
+    fun inventories(): List<InventoryGraphqlResponse> =
+        inventoryService.getAllInventory().map(InventoryGraphqlResponse::from)
 
     @QueryMapping
-    fun inventory(@Argument id: Long): InventoryResponse =
-        InventoryResponse.from(inventoryService.getInventory(id))
+    fun inventory(@Argument id: Long): InventoryGraphqlResponse =
+        InventoryGraphqlResponse.from(inventoryService.getInventory(id))
 }

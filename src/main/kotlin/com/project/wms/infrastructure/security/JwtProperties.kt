@@ -9,7 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "app.jwt")
 data class JwtProperties(
     val secret: String,
-    val expirationMinutes: Long = 60,
+    val expirationMinutes: Long = 15,
+    val refreshExpirationDays: Long = 14,
 ) {
     init {
         // HS256은 키 길이가 해시 출력(256bit=32byte) 이상이어야 한다. 짧으면 기동 시점에 막는다.

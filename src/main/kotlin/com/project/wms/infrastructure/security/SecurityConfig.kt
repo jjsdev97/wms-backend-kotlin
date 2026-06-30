@@ -25,8 +25,11 @@ import org.springframework.security.web.SecurityFilterChain
 import javax.crypto.spec.SecretKeySpec
 
 @Configuration
-@EnableConfigurationProperties(JwtProperties::class)
-class SecurityConfig(private val properties: JwtProperties) {
+@EnableConfigurationProperties(JwtProperties::class, SecurityExposureProperties::class)
+class SecurityConfig(
+    private val properties: JwtProperties,
+    private val exposure: SecurityExposureProperties,
+) {
 
     private val secretKey = SecretKeySpec(properties.secret.toByteArray(), "HmacSHA256")
 
@@ -37,9 +40,8 @@ class SecurityConfig(private val properties: JwtProperties) {
     //        재고 쓰기를 인증된 주체로 제한하는 것이 이번 보안 작업의 유일한 기능 목표다.
     //  - REST 인증(auth)  → 공개. 회원가입·로그인은 토큰을 받기 전이라 인증 불가.
     //  - GraphQL          → 공개. 조회 전용(Mutation 없음)이라 쓰기 구멍이 없다.
-    //  - MCP              → 공개. 내부 LLM 전용이며 내부망 가정. 전송 인증/행위 가드는
-    //                       JWT와 다른 보안 모델이라 이번 범위에서 제외(후속 단계).
-    //  - 문서/운영(swagger, actuator) → 공개(로컬 학습 편의).
+    //  - MCP              → 기본 인증 필요. 로컬 학습 환경에서만 설정으로 공개할 수 있다.
+    //  - 문서/운영(swagger, actuator, graphiql) → 기본 인증 필요. 로컬 학습 환경에서만 설정으로 공개할 수 있다.
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
@@ -49,18 +51,36 @@ class SecurityConfig(private val properties: JwtProperties) {
             .authorizeHttpRequests {
                 it
                     // --- 공개: 인증 진입점 ---
+                    .requestMatchers("/api/v1/auth/logout-all").authenticated()
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     // --- REST: 조회는 공개, 쓰기는 인증 ---
                     .requestMatchers(HttpMethod.GET, "/api/v1/inventory/**").permitAll()
                     .requestMatchers("/api/v1/inventory/**").authenticated()
                     // --- GraphQL: 조회 전용이라 공개 ---
-                    .requestMatchers("/graphql", "/graphiql/**").permitAll()
-                    // --- MCP: 내부망 가정, 공개 ---
-                    .requestMatchers("/mcp/**").permitAll()
-                    // --- 문서/운영 ---
-                    .requestMatchers(
-                        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/actuator/**"
-                    ).permitAll()
+                    .requestMatchers("/graphql").permitAll()
+                    // --- MCP: 기본 보호, 로컬 학습 환경에서만 공개 가능 ---
+                    .apply {
+                        if (exposure.mcpPublic) {
+                            requestMatchers("/mcp/**").permitAll()
+                        } else {
+                            requestMatchers("/mcp/**").authenticated()
+                        }
+                    }
+                    // --- 문서/운영: 기본 보호, 로컬 학습 환경에서만 공개 가능 ---
+                    .apply {
+                        val devEndpoints = arrayOf(
+                            "/graphiql/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/v3/api-docs/**",
+                            "/actuator/**",
+                        )
+                        if (exposure.devEndpointsPublic) {
+                            requestMatchers(*devEndpoints).permitAll()
+                        } else {
+                            requestMatchers(*devEndpoints).authenticated()
+                        }
+                    }
                     .anyRequest().authenticated()
             }
             // Bearer JWT를 검증하는 리소스 서버. 위 authenticated 경로에 적용된다.

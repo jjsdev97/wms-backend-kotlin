@@ -16,6 +16,6 @@ type InventoryItem {
     quantity: Int!
     reserved: Int!
     available: Int!
-    version: Int!
+    version: String!
     updatedAt: String!
 }

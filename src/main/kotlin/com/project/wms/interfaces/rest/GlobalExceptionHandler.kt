@@ -7,9 +7,11 @@ import com.project.wms.domain.inventory.IllegalReservationStateException
 import com.project.wms.domain.inventory.InventoryNotFoundException
 import com.project.wms.domain.inventory.ReservationConflictException
 import com.project.wms.domain.inventory.ReservationNotFoundException
+import com.project.wms.domain.user.InvalidRefreshTokenException
 import com.project.wms.domain.user.UsernameAlreadyExistsException
 import com.project.wms.infrastructure.idempotency.IdempotencyConflictException
 import com.project.wms.infrastructure.idempotency.IdempotencyKeyReuseException
+import com.project.wms.infrastructure.security.AuthRateLimitException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.dao.OptimisticLockingFailureException
@@ -78,6 +80,14 @@ class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException::class)
     fun handleAuthentication(e: AuthenticationException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다.")
+
+    @ExceptionHandler(InvalidRefreshTokenException::class)
+    fun handleInvalidRefreshToken(e: InvalidRefreshTokenException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.message ?: "유효하지 않은 refresh token")
+
+    @ExceptionHandler(AuthRateLimitException::class)
+    fun handleAuthRateLimit(e: AuthRateLimitException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, e.message ?: "요청이 너무 많습니다.")
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(e: MethodArgumentNotValidException): ProblemDetail {

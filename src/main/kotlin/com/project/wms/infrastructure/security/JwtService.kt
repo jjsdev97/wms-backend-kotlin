@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters
 import org.springframework.stereotype.Service
+import com.project.wms.domain.user.Role
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -22,13 +23,20 @@ class JwtService(
     private val properties: JwtProperties,
 ) {
     fun issueToken(authentication: Authentication): String {
-        val now = Instant.now()
         val scope = authentication.authorities.joinToString(" ") { it.authority ?: "" }
+        return issueToken(authentication.name, scope)
+    }
+
+    fun issueToken(username: String, role: Role): String =
+        issueToken(username, "ROLE_${role.name}")
+
+    private fun issueToken(username: String, scope: String): String {
+        val now = Instant.now()
         val claims = JwtClaimsSet.builder()
             .issuer("k-wms")
             .issuedAt(now)
             .expiresAt(now.plus(properties.expirationMinutes, ChronoUnit.MINUTES))
-            .subject(authentication.name)
+            .subject(username)
             .claim("scope", scope)
             .build()
         // 대칭키(HS256) 사용 시 서명 알고리즘을 헤더로 명시해야 Nimbus가 서명키를 선택할 수 있다.
