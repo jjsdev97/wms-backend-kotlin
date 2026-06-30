@@ -1,7 +1,7 @@
 # GraphQL은 "조회 전용" 프로토콜로 운용한다.
 #  - 도입 명분(선택적 필드 조회 / N+1 해결)이 읽기 쪽에 집중돼 있고,
-#  - 재고를 바꾸는 쓰기 경로는 REST(인증 필요)와 MCP(내부망)로 일원화한다.
-# 따라서 Mutation 타입은 의도적으로 두지 않는다. 쓰기가 필요하면 REST를 쓸 것.
+#  - 재고를 바꾸는 쓰기 경로는 REST와 MCP tool로 분리한다.
+# 따라서 Mutation 타입은 의도적으로 두지 않는다. 쓰기가 필요하면 REST 또는 MCP tool을 쓸 것.
 type Query {
     "전체 재고 조회"
     inventories: [InventoryItem!]!
@@ -16,6 +16,7 @@ type InventoryItem {
     quantity: Int!
     reserved: Int!
     available: Int!
+    "JPA @Version 값. 32비트 Int 범위를 넘을 수 있어 문자열로 노출한다."
     version: String!
     updatedAt: String!
 }

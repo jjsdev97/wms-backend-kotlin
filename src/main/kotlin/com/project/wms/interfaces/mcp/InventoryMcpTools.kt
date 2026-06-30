@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 /**
  * MCP tool 정의. REST·GraphQL과 동일한 [InventoryService]를 재사용한다.
  * Spring AI MCP server starter가 [Tool] 메서드를 MCP tool로 노출한다.
+ * MCP 엔드포인트의 인증·공개 여부는 [com.project.wms.infrastructure.security.SecurityConfig]가 관리한다.
  *
  * 예약·확정·취소는 `reservationId` 자연키로 도메인 차원에서 멱등하므로, LLM이
  * 같은 키로 재호출해도 중복 차감이 없다. 반면 [adjustStock]은 자연키가 없는
